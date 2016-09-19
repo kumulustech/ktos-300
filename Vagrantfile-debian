@@ -15,8 +15,6 @@ Vagrant.configure("2") do |config|
     end
 
     c.vm.provision "shell", privileged: true, inline: <<-SHELL
-      setenforce 0
-      sed -i "s/^\s*SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config
 
       apt-get -y install \
           vim \
@@ -62,11 +60,9 @@ EOF
       BASE="$(echo $ADDRESS | cut -d. -f 1,2,3)"
       VIP=$(echo "${BASE}.254")
 
-      sed -i "s/^kolla_internal_vip_address:.*/kolla_internal_vip_address: \\"${VIP}\\"/g" ${GLOBALS_FILE}
-      sed -i "s/^network_interface:.*/network_interface: \\"${NETWORK_INTERFACE}\\"/g" ${GLOBALS_FILE}
-      sed -i "s/^neutron_external_interface:.*/neutron_external_interface: \\"${NEUTRON_INTERFACE}\\"/g" ${GLOBALS_FILE}
-#      sed -i "s/^docker_registry:.*/docker_registry: '10.133.210.52:4000'" ${GLOBALS_FILE}
-#      sed -i "s/^docker_registry:.*/docker_registry: 'kolla.opsits.com:4000'" ${GLOBALS_FILE}
+      sed -i "s/^kolla_internal_vip_address:.*/kolla_internal_vip_address: ${VIP}/g" ${GLOBALS_FILE}
+      sed -i "s/^network_interface:.*/network_interface: ${NETWORK_INTERFACE}/g" ${GLOBALS_FILE}
+      sed -i "s/^neutron_external_interface:.*/neutron_external_interface: ${NEUTRON_INTERFACE}/g" ${GLOBALS_FILE}
       echo "${ADDRESS} localhost" >> /etc/hosts
 
       mkdir -p /etc/kolla/config/nova/
