@@ -13,9 +13,9 @@ set -x
           ntp \
           ansible \
           bridge-utils \
-          docker
+          docker -y
 
-      apt-get purge lxc lxd
+      apt-get purge lxc lxd -y
       pip install -U pip
       mkdir -p /etc/systemd/system/docker.service.d
     tee /etc/systemd/system/docker.service.d/kolla.conf <<-EOF
