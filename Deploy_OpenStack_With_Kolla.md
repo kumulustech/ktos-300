@@ -63,7 +63,8 @@ Alternatively, there is a CentOS VirtualBox (OVA packaged) image available here:
 a) Log in to the virtual machine
 b) copy/paste the following into the machine, or grab the script from the repository.
 
-```setenforce 0
+```
+setenforce 0
 sed -i "s/^\s*SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config
 
 yum -y install epel-release
@@ -133,6 +134,7 @@ kolla-ansible deploy
 
 echo "Login using http://${NETWORK_INTERFACE}/ with admin as username and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
 ```
+
 Note: It may be necessary to change the NETWORK_INTERFACE and NEUTRON_INTERFACE to map to the interface names of the system as built.  To determine the network interfaces, run:
 
   ip a
