@@ -4,7 +4,7 @@ set -x
           vim \
           python-pip \
           python-dev \
-          python-nedaddr \
+          python-netaddr \
           python-openstackclient \
           python-neutronclient \
           libffi-dev \
