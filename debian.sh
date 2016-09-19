@@ -53,9 +53,9 @@ virt_type=qemu
 EOF
 
       kolla-genpwd
-      sed -i "s/^keystone_admin_password:.*/keystone_admin_password: Koll@0penst@ck" /etc/kolla/passwords.yml
+      sed -i -e "s/^keystone_admin_password:.*/keystone_admin_password: Koll@0penst@ck/" /etc/kolla/passwords.yml
       kolla-ansible prechecks
       kolla-ansible pull
       kolla-ansible deploy
 
-      echo "Login using http://127.0.0.1:8080/ with admin as username and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
+      echo "Login using http://${VIP}:8080/ with  default as domain, admin as username, and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
