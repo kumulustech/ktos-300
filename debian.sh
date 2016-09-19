@@ -12,7 +12,7 @@ set -x
           gcc \
           ansible \
           bridge-utils \
-          docker -y
+          docker.io -y
 
       apt-get purge lxc lxd -y
       pip install -U pip
