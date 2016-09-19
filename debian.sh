@@ -1,16 +1,15 @@
 #!/bin/bash
 set -x
-      apt-get -y install \
+      apt install python-pip -y
+      apt install \
           vim \
-          python-pip \
           python-dev \
           python-netaddr \
           python-openstackclient \
           python-neutronclient \
           libffi-dev \
-          openssl-dev \
+          libssl-dev \
           gcc \
-          ntp \
           ansible \
           bridge-utils \
           docker -y
@@ -24,10 +23,8 @@ MountFlags=shared
 EOF
 
       systemctl daemon-reload
-      systemctl enable docker
-      systemctl enable ntpd.service
-      systemctl restart docker
-      systemctl restart ntpd.service
+      systemctl enable dockerd
+      systemctl restart dockerd
 
       systemctl stop libvirtd.service
       systemctl disable libvirtd.service
