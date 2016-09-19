@@ -22,14 +22,15 @@ Vagrant.configure("2") do |config|
           vim \
           python-pip \
           python-dev \
-          python-docker-py \
+          python-nedaddr \
           python-openstackclient \
           python-neutronclient \
-          libffi-devel \
-          openssl-devel \
+          libffi-dev \
+          openssl-dev \
           gcc \
-          make \
           ntp \
+          ansible \
+          bridge-utils \
           docker
 
       apt-get purge lxc lxd
