@@ -34,8 +34,8 @@ EOF
 
       cp -r /usr/share/kolla/etc_examples/kolla /etc/
 
-      NETWORK_INTERFACE="eth1"
-      NEUTRON_INTERFACE="eth2"
+      NETWORK_INTERFACE="enp0s8"
+      NEUTRON_INTERFACE="enp0s9"
       GLOBALS_FILE="/etc/kolla/globals.yml"
       ADDRESS="$(ip -4 addr show ${NETWORK_INTERFACE} | grep "inet" | awk '{print $2}' | cut -d/ -f1)"
       BASE="$(echo $ADDRESS | cut -d. -f 1,2,3)"
