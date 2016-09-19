@@ -32,7 +32,7 @@ EOF
       pip install ansible==1.9.6
       pip install kolla
 
-      cp -r /usr/share/kolla/etc_examples/kolla /etc/
+      cp -r /usr/local/share/kolla/etc_examples/kolla /etc/
 
       NETWORK_INTERFACE="enp0s8"
       NEUTRON_INTERFACE="enp0s9"
