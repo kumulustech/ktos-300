@@ -179,4 +179,18 @@ Restart the container (stop/start). Often used when modifying configurations, ei
 
 - Find the docker image running the openstack nova-compute process
 - Connect to the container as the UID 0 (root) user, and navigate to the /etc/nova/nova.conf file
-- 
+- find the libvirt_type parameter in the configuration file, what is it set to
+- leave the container and on the base OS, navigate to the /etc/kolla/nova_compute directory
+- find the libvirt_type parameter in the config file (nova.conf)
+- edit the file add a new parameter to the [default] section called debug, and set it to True
+- log back into the container, and verify that the container also sees the configuration parameter as True
+- exit the container and let's find the logs
+- first inspect the container, look for the Mounts section, and find the log path
+- navigate to the log directory and tail the compute log file, spin up a vm and see if we get log messages spooling by
+
+### Extra Credit
+- Install the crudini tool
+- Use it to change the nova debug parameter back to false
+- Use it to check that the parameter is actually set to false
+- restart the container to reload the updated parameter
+- follow the logs while a vm spins up, do you notice a change in the output from the process?
