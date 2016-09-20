@@ -80,7 +80,7 @@ virt_type=qemu
 EOF
 
       kolla-genpwd
-      sed -i "s/^keystone_admin_password:.*/keystone_admin_password: Koll@0penst@ck" /etc/kolla/passwords.yml
+      sed -i -e "s/^keystone_admin_password:.*/keystone_admin_password: admin1/" /etc/kolla/passwords.yml
       kolla-ansible prechecks
       kolla-ansible pull
       kolla-ansible deploy
@@ -92,7 +92,7 @@ export OS_PROJECT_NAME=admin
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
 export OS_PASSWORD=$(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}')
-export OS_AUTH_URL=http://172.28.128.3:35357/v3
+export OS_AUTH_URL=http://${ADDRESS}:35357/v3
 export OS_IDENTITY_API_VERSION=3
 EOF
 
@@ -100,7 +100,7 @@ bash /vagrant/import_image.sh
 
 bash /vagrant/setup_network.sh
 
-      echo "Login using http://172.28.128.3 with admin as username and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
+      echo "Login using http://${ADDRESS} with default as domain,  admin as username, and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
     SHELL
   end
 end
