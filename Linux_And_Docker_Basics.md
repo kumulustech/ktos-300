@@ -173,15 +173,15 @@ Start a container that's been previously stopped, or start a container by pullin
 docker restart container_name
 ```
 
-Restart the container (stop/start). Often used when modifying configurations, either external, or within the container itself (edits via docker exec "presist" with the current container deployment)
+Restart the container (stop/start). Often used when modifying configurations, either external, or within the container itself (edits via docker exec "persist" with the current container deployment)
 
 ### Exercises
 
 - Find the docker image running the openstack nova-compute process
 - Connect to the container as the UID 0 (root) user, and navigate to the /etc/nova/nova.conf file
-- find the libvirt_type parameter in the configuration file, what is it set to
+- find the virt_type parameter in the configuration file, what is it set to
 - leave the container and on the base OS, navigate to the /etc/kolla/nova_compute directory
-- find the libvirt_type parameter in the config file (nova.conf)
+- find the virt_type parameter in the config file (nova.conf)
 - edit the file add a new parameter to the [default] section called debug, and set it to True
 - log back into the container, and verify that the container also sees the configuration parameter as True
 - exit the container and let's find the logs
