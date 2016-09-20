@@ -14,6 +14,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.source ~/admin.rc
 
+source /root/open.rc
+
 tenant=`openstack project list -f csv --quote none | grep admin | cut -d, -f1`
 public_network=192.168.10
 neutron net-create public --tenant-id ${tenant} --router:external --provider:network_type flat --provider:physical_network physnet1 --shared

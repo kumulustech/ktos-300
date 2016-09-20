@@ -3,6 +3,7 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
+  config.vm.synced_folder ".", "/home/vagrant/sync", type: "virtualbox"
 
   config.ssh.insert_key = false
 
@@ -14,7 +15,6 @@ Vagrant.configure("2") do |config|
 
     c.vm.provider "virtualbox" do |vb|
         vb.memory = "4096"
-        vb.cpus = 2
     end
 
     c.vm.provision "shell", privileged: true, inline: <<-SHELL
@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
       sed -i "s/^\s*SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config
 
       yum -y install epel-release centos-release-openstack-mitaka
-
+  
       yum -y install \
           vim \
           net-tools \
@@ -69,6 +69,8 @@ EOF
       sed -i "s/^kolla_internal_vip_address:.*/kolla_internal_vip_address: \\"${VIP}\\"/g" ${GLOBALS_FILE}
       sed -i "s/^network_interface:.*/network_interface: \\"${NETWORK_INTERFACE}\\"/g" ${GLOBALS_FILE}
       sed -i "s/^neutron_external_interface:.*/neutron_external_interface: \\"${NEUTRON_INTERFACE}\\"/g" ${GLOBALS_FILE}
+#      sed -i "s/^docker_registry:.*/docker_registry: '10.133.210.52:4000'" ${GLOBALS_FILE}
+#      sed -i "s/^docker_registry:.*/docker_registry: 'kolla.opsits.com:4000'" ${GLOBALS_FILE}
       echo "${ADDRESS} localhost" >> /etc/hosts
 
       mkdir -p /etc/kolla/config/nova/
@@ -78,12 +80,27 @@ virt_type=qemu
 EOF
 
       kolla-genpwd
-      sed -i "s/^keystone_admin_password:.*/keystone_admin_password: Koll@0penst@ck/" /etc/kolla/passwords.yml
+      sed -i "s/^keystone_admin_password:.*/keystone_admin_password: Koll@0penst@ck" /etc/kolla/passwords.yml
       kolla-ansible prechecks
       kolla-ansible pull
       kolla-ansible deploy
 
-      echo "Login using http://172.28.128.3/ with admin as username and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
+    tee > /root/open.rc <<EOF
+export OS_PROJECT_DOMAIN_ID=default
+export OS_USER_DOMAIN_ID=default
+export OS_PROJECT_NAME=admin
+export OS_TENANT_NAME=admin
+export OS_USERNAME=admin
+export OS_PASSWORD=$(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}')
+export OS_AUTH_URL=http://172.28.128.3:35357/v3
+export OS_IDENTITY_API_VERSION=3
+EOF
+
+bash /vagrant/import_image.sh
+
+bash /vagrant/setup_network.sh
+
+      echo "Login using http://172.28.128.3 with admin as username and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
     SHELL
   end
 end
