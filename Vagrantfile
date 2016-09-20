@@ -8,17 +8,20 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "aio" do |c|
     c.vm.network "forwarded_port", guest: 80, host: 8080
-    c.vm.network "private_network", type: "dhcp"
+    c.vm.network "forwarded_port", guest: 6080, host: 6080
+    c.vm.network "private_network", ip: "172.28.128.3"
+    c.vm.network "private_network", ip: "192.168.10.10"
 
     c.vm.provider "virtualbox" do |vb|
         vb.memory = "4096"
+        vb.cpus = 2
     end
 
     c.vm.provision "shell", privileged: true, inline: <<-SHELL
       setenforce 0
       sed -i "s/^\s*SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config
 
-      yum -y install epel-release
+      yum -y install epel-release centos-release-openstack-mitaka
 
       yum -y install \
           vim \
@@ -56,8 +59,8 @@ EOF
 
       cp -r /usr/share/kolla/etc_examples/kolla /etc/
 
-      NETWORK_INTERFACE="eth0"
-      NEUTRON_INTERFACE="eth1"
+      NETWORK_INTERFACE="eth1"
+      NEUTRON_INTERFACE="eth2"
       GLOBALS_FILE="/etc/kolla/globals.yml"
       ADDRESS="$(ip -4 addr show ${NETWORK_INTERFACE} | grep "inet" | awk '{print $2}' | cut -d/ -f1)"
       BASE="$(echo $ADDRESS | cut -d. -f 1,2,3)"
@@ -66,8 +69,6 @@ EOF
       sed -i "s/^kolla_internal_vip_address:.*/kolla_internal_vip_address: \\"${VIP}\\"/g" ${GLOBALS_FILE}
       sed -i "s/^network_interface:.*/network_interface: \\"${NETWORK_INTERFACE}\\"/g" ${GLOBALS_FILE}
       sed -i "s/^neutron_external_interface:.*/neutron_external_interface: \\"${NEUTRON_INTERFACE}\\"/g" ${GLOBALS_FILE}
-#      sed -i "s/^docker_registry:.*/docker_registry: '10.133.210.52:4000'" ${GLOBALS_FILE}
-#      sed -i "s/^docker_registry:.*/docker_registry: 'kolla.opsits.com:4000'" ${GLOBALS_FILE}
       echo "${ADDRESS} localhost" >> /etc/hosts
 
       mkdir -p /etc/kolla/config/nova/
@@ -77,12 +78,12 @@ virt_type=qemu
 EOF
 
       kolla-genpwd
-      sed -i "s/^keystone_admin_password:.*/keystone_admin_password: Koll@0penst@ck" /etc/kolla/passwords.yml
+      sed -i "s/^keystone_admin_password:.*/keystone_admin_password: Koll@0penst@ck/" /etc/kolla/passwords.yml
       kolla-ansible prechecks
       kolla-ansible pull
       kolla-ansible deploy
 
-      echo "Login using http://127.0.0.1:8080/ with admin as username and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
+      echo "Login using http://172.28.128.3/ with admin as username and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
     SHELL
   end
 end

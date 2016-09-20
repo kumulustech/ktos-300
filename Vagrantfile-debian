@@ -4,80 +4,112 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
 
-  config.ssh.insert_key = false
-
   config.vm.define "aio" do |c|
     c.vm.network "forwarded_port", guest: 80, host: 8080
-    c.vm.network "private_network", type: "dhcp"
+    c.vm.network "private_network", ip: "172.28.128.3"
+    c.vm.network "private_network", ip: "192.168.10.3"
 
     c.vm.provider "virtualbox" do |vb|
         vb.memory = "4096"
+        vb.cpus = 2
     end
 
     c.vm.provision "shell", privileged: true, inline: <<-SHELL
+    cat >> /etc/resolv.conf <<EOF
+nameserver 8.8.8.8
+EOF
+    apt install python-pip -y
+    apt install \
+        vim \
+        python-dev \
+        python-netaddr \
+        python-openstackclient \
+        python-neutronclient \
+        libffi-dev \
+        libssl-dev \
+        gcc \
+        ansible \
+        bridge-utils \
+        docker.io -y
 
-      apt-get -y install \
-          vim \
-          python-pip \
-          python-dev \
-          python-netaddr \
-          python-openstackclient \
-          python-neutronclient \
-          libffi-dev \
-          openssl-dev \
-          gcc \
-          ntp \
-          ansible \
-          bridge-utils \
-          docker
-
-      apt-get purge lxc lxd
-      pip install -U pip
-      mkdir -p /etc/systemd/system/docker.service.d
-    tee /etc/systemd/system/docker.service.d/kolla.conf <<-EOF
+    apt-get purge lxc lxd -y
+    pip install -U pip
+    mkdir -p /etc/systemd/system/docker.service.d
+  tee /etc/systemd/system/docker.service.d/kolla.conf <<-EOF
 [Service]
 MountFlags=shared
 EOF
 
-      systemctl daemon-reload
-      systemctl enable docker
-      systemctl enable ntpd.service
-      systemctl restart docker
-      systemctl restart ntpd.service
+    systemctl daemon-reload
+    systemctl enable docker
+    systemctl restart docker
 
-      systemctl stop libvirtd.service
-      systemctl disable libvirtd.service
+    pip install ansible==1.9.6
+    pip install kolla
 
-      pip install ansible==1.9.6
-      pip install kolla
+    cp -r /usr/local/share/kolla/etc_examples/kolla /etc/
 
-      cp -r /usr/share/kolla/etc_examples/kolla /etc/
+    NETWORK_INTERFACE="enp0s8"
+    NEUTRON_INTERFACE="enp0s9"
+    GLOBALS_FILE="/etc/kolla/globals.yml"
+    ADDRESS="$(ip -4 addr show ${NETWORK_INTERFACE} | grep "inet" | awk '{print $2}' | cut -d/ -f1)"
+    BASE="$(echo $ADDRESS | cut -d. -f 1,2,3)"
+    VIP=$(echo "${BASE}.254")
 
-      NETWORK_INTERFACE="eth1"
-      NEUTRON_INTERFACE="eth2"
-      GLOBALS_FILE="/etc/kolla/globals.yml"
-      ADDRESS="$(ip -4 addr show ${NETWORK_INTERFACE} | grep "inet" | awk '{print $2}' | cut -d/ -f1)"
-      BASE="$(echo $ADDRESS | cut -d. -f 1,2,3)"
-      VIP=$(echo "${BASE}.254")
+    PUB_ADDRESS="$(ip -4 addr show ${NEUTRON_INTERFACE} | grep "inet" | awk '{print $2}' | cut -d/ -f1)"
+    PUB_BASE="$(echo $PUB_ADDRESS | cut -d. -f 1,2,3)"
 
-      sed -i "s/^kolla_internal_vip_address:.*/kolla_internal_vip_address: ${VIP}/g" ${GLOBALS_FILE}
-      sed -i "s/^network_interface:.*/network_interface: ${NETWORK_INTERFACE}/g" ${GLOBALS_FILE}
-      sed -i "s/^neutron_external_interface:.*/neutron_external_interface: ${NEUTRON_INTERFACE}/g" ${GLOBALS_FILE}
-      echo "${ADDRESS} localhost" >> /etc/hosts
+    sed -i "s/^kolla_internal_vip_address:.*/kolla_internal_vip_address: ${VIP}/g" ${GLOBALS_FILE}
+    sed -i "s/^network_interface:.*/network_interface: ${NETWORK_INTERFACE}/g" ${GLOBALS_FILE}
+    sed -i "s/^neutron_external_interface:.*/neutron_external_interface: ${NEUTRON_INTERFACE}/g" ${GLOBALS_FILE}
+    echo "${ADDRESS} `hostname`" >> /etc/hosts
 
-      mkdir -p /etc/kolla/config/nova/
-    tee > /etc/kolla/config/nova/nova-compute.conf <<-EOF
+    mkdir -p /etc/kolla/config/nova/
+  tee > /etc/kolla/config/nova/nova-compute.conf <<-EOF
 [libvirt]
 virt_type=qemu
 EOF
 
-      kolla-genpwd
-      sed -i "s/^keystone_admin_password:.*/keystone_admin_password: Koll@0penst@ck" /etc/kolla/passwords.yml
-      kolla-ansible prechecks
-      kolla-ansible pull
-      kolla-ansible deploy
+    kolla-genpwd
+    sed -i -e "s/^keystone_admin_password:.*/keystone_admin_password: Koll@0penst@ck/" /etc/kolla/passwords.yml
+    kolla-ansible prechecks
+    kolla-ansible pull
+    kolla-ansible deploy
 
-      echo "Login using http://127.0.0.1:8080/ with admin as username and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
+
+    tee > /root/open.rc <<-EOF
+export OS_PROJECT_DOMAIN_ID=default
+export OS_USER_DOMAIN_ID=default
+export OS_PROJECT_NAME=admin
+export OS_TENANT_NAME=admin
+export OS_USERNAME=admin
+export OS_PASSWORD=$(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}')
+export OS_AUTH_URL=http://${VIP}:35357/v3
+export OS_IDENTITY_API_VERSION=3
+EOF
+    tee > /root/net_start.sh <<-EOF
+source /root/openrc.sh
+tenant=\\`openstack project list -f csv --quote none | grep admin | cut -d, -f1\\`
+neutron net-create public --tenant-id ${tenant} --router:external --provider:network_type flat --provider:physical_network physnet1 --shared
+#if segmented network{vlan,vxlan,gre}: --provider:segmentation_id \${segment_id}
+neutron subnet-create public ${PUB_BASE}.0/24 --tenant-id \${tenant} --allocation-pool start=${PUB_BASE}.80,end=${PUB_BASE}.99 --dns-nameserver 8.8.8.8 --disable-dhcp
+# if you need a specific route to get "out" of your public network: --host-route destination=10.0.0.0/8,nexthop=10.1.10.254
+
+neutron net-create private --tenant-id \${tenant}
+neutron subnet-create private 192.168.100.0/24 --tenant-id \${tenant} --dns-nameserver 8.8.8.8 --name private
+
+neutron router-create pub-router --tenant-id \${tenant}
+neutron router-gateway-set pub-router public
+neutron router-interface-add pub-router private
+
+# Adjust the default security group.  This is not good practice
+default_group=\\`neutron security-group-list | awk '/ default / {print $2}' | tail -n 1\\`
+neutron security-group-rule-create --direction ingress --port-range-min 22 --port-range-max 22 --protocol tcp --remote-ip-prefix 0.0.0.0/0 \${default_group}
+neutron security-group-rule-create --direction ingress --port-range-min 80 --port-range-max 80 --protocol tcp --remote-ip-prefix 0.0.0.0/0 \${default_group}
+neutron security-group-rule-create --direction ingress --port-range-min 443 --port-range-max 443 --protocol tcp --remote-ip-prefix 0.0.0.0/0 \${default_group}
+EOF
+
+    echo "Login using http://${VIP}/ with  default as domain, admin as username, and $(cat /etc/kolla/passwords.yml | grep "keystone_admin_password" | awk '{print $2}') as password"
     SHELL
   end
 end

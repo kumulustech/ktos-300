@@ -21,7 +21,7 @@ this will provide a listing of the files in the directory
 ```
 ls -la
 ```
-Which provides more information including "hidden" directorys and files that begin with a '.'
+Which provides more information including "hidden" directories and files that begin with a '.'
 
 ```
 [vagrant@localhost ~]$ ls -la
@@ -126,14 +126,14 @@ rm file
 
 remove a file
 
-Exercises:
+###Exercises
 
-create a file with cat that exports the "OS_DATE" environment variable
-look at what is in the file with less
-change the file permissions to include the execute bits
-"source" the file
-check the environment for the OS_DATE environment variable
-explore the diretory enviornment with cd and ls {hint: cd / takes you to the root of the filesystem}
+- create a file with cat that exports the "OS_DATE" environment variable
+- look at what is in the file with less
+- change the file permissions to include the execute bits
+- "source" the file
+- check the environment for the OS_DATE environment variable
+- explore the directory environment with cd and ls {hint: cd / takes you to the root of the filesystem}
 
 ## Some Docker commands
 
@@ -147,7 +147,7 @@ What is running in docker. Often we want to find the "name" or last parameter of
 docker inspect container_name
 ```
 
-The output of this command has very useful information, specifically, any volume mappints, where "external" directories are mapped to different directory paths in the container.  For example:
+The output of this command has very useful information, specifically, any volume mappings, where "external" directories are mapped to different directory paths in the container.  For example:
 
 /etc/kolla/nova-compute/ is mapped to /etc/nova/ in the nova-compute container, and we can find this out via the ```inspect``` command.
 
@@ -156,3 +156,27 @@ docker exec -itu 0 container_name bash
 ```
 
 This will give us a shell (bash) in the container namespace as the "root" user. This is often important for some debug stagets.  remove the 'u 0' parameter and argument in order to log in as the internal process owner user in the openstack kolla derived containers.
+
+```
+docker stop container_name
+```
+
+Halt (but do not remove) the container.  This is a way to ensure the container is not running, but keeps it's configuration.
+
+```
+docker run container_name
+```
+
+Start a container that's been previously stopped, or start a container by pulling the image either from the local "cache" of images ```docker images``` or from the defined upstream image registry (often docker hub unless a local resource has been configured)
+
+```
+docker restart container_name
+```
+
+Restart the container (stop/start). Often used when modifying configurations, either external, or within the container itself (edits via docker exec "presist" with the current container deployment)
+
+### Exercises
+
+- Find the docker image running the openstack nova-compute process
+- Connect to the container as the UID 0 (root) user, and navigate to the /etc/nova/nova.conf file
+- 

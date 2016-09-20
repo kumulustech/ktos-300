@@ -15,7 +15,7 @@
 #   limitations under the License.source ~/admin.rc
 
 tenant=`openstack project list -f csv --quote none | grep admin | cut -d, -f1`
-public_network=10.1.10
+public_network=192.168.10
 neutron net-create public --tenant-id ${tenant} --router:external --provider:network_type flat --provider:physical_network physnet1 --shared
 #if segmented network{vlan,vxlan,gre}: --provider:segmentation_id ${segment_id}
 neutron subnet-create public ${public_network}.0/24 --tenant-id ${tenant} --allocation-pool start=${public_network}.80,end=${public_network}.99 --dns-nameserver 8.8.8.8 --disable-dhcp
