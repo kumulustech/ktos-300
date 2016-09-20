@@ -3,7 +3,7 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
-  config.vm.synced_folder ".", "/home/vagrant/sync", type: "virtualbox"
+  #config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
 
   config.ssh.insert_key = false
 
@@ -14,6 +14,7 @@ Vagrant.configure("2") do |config|
     c.vm.network "private_network", ip: "192.168.10.10"
 
     c.vm.provider "virtualbox" do |vb|
+        vb.cpus   = "2"
         vb.memory = "4096"
     end
 
