@@ -59,7 +59,7 @@ openstack server resize
 While we'll look at Neutron next, there are still some common operations even if we just use the "generic" network model.  Specifically, FloatingIP allocation and association that is more commonly handled via nova.
 
 ```
-openstack server floatingip
+openstack server ip floating
 ```
 
 - assoicate a floating IP with the instnace
