@@ -9,19 +9,20 @@ openstack image
 ```
 
 - How can I create an image that is pulled from a remote http source?
-- Get a cirros image (http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img) onto the local disk, and upload the image _pointer_ but not the image itself
-  - verify this by looking for a image id in the on disk image repository
+- How about referencing another image as the source (a way to administratively share non-public images)
+- Get a cirros image (http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img) onto the local disk, and upload the image
+
 ### Extra credit
   - How do I find where the image repository is (inspect...)
 
 ```
-openstack save
+openstack image save
 ```
 
 - Can I get an image back (more important when we talk about snapshots)
 
 ```
-openstack set
+openstack image set
 ```
 
 - how do I go about uploading the three parts of an Amazon AMI
@@ -39,6 +40,8 @@ glance help
 
 what's different about the commands available via the glance command?
 - pay attention to the note at the end of the help output... Try that command
+- Tell glance to point to an image on disk (without importing it)
+  - verify this by looking for a image id in the on disk image repository
 
 - Use the V1 API to create apointer to a local file
   - what happens to the on disk repository? (remember where that is?)
