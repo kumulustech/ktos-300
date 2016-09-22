@@ -19,6 +19,8 @@ So lets start!
 0) A little housekeeping:  The default Kolla installation does not include swift as a running service by default.  uncomment the swift parameter in the startup script, and rerun the "deploy" process:
 
 ```
+for n in `docker ps -qa`; do docker stop $n; docker rm -v $n; done
+setup_swift.sh
 kolla-ansible deploy
 ```
 
@@ -28,10 +30,13 @@ kolla-ansible deploy
 2) we need a client:
 
 ```
+pip install python-swiftclient
+
 swift post
 swift upload
 ```
-or
+or use the openstack cli
+
 ```
 openstack container
 openstack object
