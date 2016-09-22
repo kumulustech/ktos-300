@@ -6,11 +6,11 @@ For Cinder, we will have to enable additional servcies and re-build our openstac
 2) We will also loose our image and networks, so the network and image scripts can re-create them quickly.
 
 ```
-echo 'enable_cinder: "yes"' > /etc/kolla/globals.yml
-echo 'enable_swift: "yes"' > /etc/kolla/globals.yml
-echo 'enable_manila: "yes"' > /etc/kolla/globals.yml
+echo 'enable_cinder: "yes"' >> /etc/kolla/globals.yml
+echo 'enable_swift: "yes"' >> /etc/kolla/globals.yml
+echo 'enable_manila: "yes"' >> /etc/kolla/globals.yml
 
-for n in `docker ps -qa`; do docker stop $n ; docker rm $n; daemon-reload
+for n in `docker ps -qa`; do docker stop $n ; docker rm $n; done
 kolla-ansible deploy
 ```
 
