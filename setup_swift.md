@@ -9,12 +9,17 @@ echo 'enable_swift: "yes"' >> /etc/kolla/globals.yml
 echo 'enable_cinder: "yes"' >> /etc/kolla/globals.yml
 ```
 
-3) Try to just "redeploy" kolla:
+3) Run the setup_swift.sh script
+```
+setup_swift.sh
+```
+
+4) Try to just "redeploy" kolla:
 ```
 kolla-ansible deploy
 ```
 
-4) Otherwise re-deploy:
+5) Otherwise re-deploy:
 ```
 for n in `docker ps -qa`; do docker stop $n; docker rm -v $n; done
 kolla-ansible deploy
