@@ -9,7 +9,6 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "aio" do |c|
     c.vm.network "forwarded_port", guest: 80, host: 8080
-    c.vm.network "forwarded_port", guest: 6080, host: 6080
     c.vm.network "private_network", ip: "172.28.128.3"
     c.vm.network "private_network", ip: "192.168.10.10"
 
@@ -24,7 +23,7 @@ Vagrant.configure("2") do |config|
     cat > /etc/sysconfig/network-scripts/ifcfg-br1 <<EOF
 DEVICE=br1
 TYPE=Bridge
-IPADDR=192.168.10.10
+IPADDR=192.168.20.10
 NETMASK=255.255.255.0
 ONBOOT=yes
 BOOTMODE=static
@@ -74,26 +73,24 @@ EOF
 
     cp -r /usr/share/kolla/etc_examples/kolla /etc/
 
-    NETWORK_INTERFACE="team0"
-    NEUTRON_INTERFACE="br1"
+    NETWORK_INTERFACE="eth1"
+    NEUTRON_INTERFACE="eth2"
     GLOBALS_FILE="/etc/kolla/globals.yml"
     ADDRESS="$(ip -4 addr show ${NETWORK_INTERFACE} | grep "inet" | head -1 |awk '{print $2}' | cut -d/ -f1)"
     BASE="$(echo ${ADDRESS} | cut -d. -f 1,2,3)"
     #VIP=$(echo "${BASE}.254")
     VIP="${ADDRESS}"
 
-    sed -i "s/^kolla_internal_vip_address:.*/kolla_internal_vip_address: \"${VIP}\"/g" ${GLOBALS_FILE}
-    sed -i "s/^network_interface:.*/network_interface: \"${NETWORK_INTERFACE}\"/g" ${GLOBALS_FILE}
+    sed -i "s/^kolla_internal_vip_address:.*/kolla_internal_vip_address: \\"${VIP}\\"/g" ${GLOBALS_FILE}
+    sed -i "s/^network_interface:.*/network_interface: \\"${NETWORK_INTERFACE}\\"/g" ${GLOBALS_FILE}
 
     cat >> ${GLOBALS_FILE} <<EOF
-neutron_bridge_name: "br1"
+#neutron_bridge_name: "br1"
 enable_haproxy: "no"
 enable_keepalived: "no"
 EOF
 
-    sed -i "s/^neutron_external_interface:.*/neutron_external_interface: \"${NEUTRON_INTERFACE}\"/g" ${GLOBALS_FILE}
-    sed -i "s/^docker_registry:.*/docker_registry: '10.133.210.52:4000'/" ${GLOBALS_FILE}
-    sed -i "s/^docker_registry:.*/docker_registry: 'kolla.opsits.com:4000'/" ${GLOBALS_FILE}
+    sed -i "s/^neutron_external_interface:.*/neutron_external_interface: \\"${NEUTRON_INTERFACE}\\"/g" ${GLOBALS_FILE}
     echo "${ADDRESS} $(hostname)" >> /etc/hosts
 
     mkdir -p /etc/kolla/config/nova/

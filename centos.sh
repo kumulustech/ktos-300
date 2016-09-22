@@ -70,6 +70,10 @@ cat >> ${GLOBALS_FILE} <<EOF
 neutron_bridge_name: "br1"
 enable_haproxy: "no"
 enable_keepalived: "no"
+enable_cinder: "yes"
+enable_ceilometer: "yes"
+enable_mongodb: "yes"
+enable_swift: "yes"
 EOF
 
 sed -i "s/^neutron_external_interface:.*/neutron_external_interface: \"${NEUTRON_INTERFACE}\"/g" ${GLOBALS_FILE}
@@ -82,6 +86,8 @@ tee > /etc/kolla/config/nova/nova-compute.conf <<-EOF
 [libvirt]
 virt_type=qemu
 EOF
+
+./setup_swift.sh
 
 kolla-genpwd
 sed -i "s/^keystone_admin_password:.*/keystone_admin_password: admin1/" /etc/kolla/passwords.yml

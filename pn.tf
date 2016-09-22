@@ -16,6 +16,14 @@ resource "packet_device" "kolla" {
         billing_cycle = "hourly"
         project_id = "320c2c2f-6876-4621-929a-93a47e07d2da"
 }
+resource "packet_device" "kolla-cmp" {
+        hostname = "kolla-cmp"
+        plan = "baremetal_0"
+        facility = "ewr1"
+	operating_system = "centos_7_image"
+        billing_cycle = "hourly"
+        project_id = "320c2c2f-6876-4621-929a-93a47e07d2da"
+}
 resource "packet_device" "student1" {
         hostname = "student1"
         plan = "baremetal_0"
@@ -40,6 +48,22 @@ resource "packet_device" "student3" {
         billing_cycle = "hourly"
         project_id = "320c2c2f-6876-4621-929a-93a47e07d2da"
 }
+resource "packet_device" "student4" {
+        hostname = "student4"
+        plan = "baremetal_0"
+        facility = "ams1"
+	operating_system = "centos_7_image"
+        billing_cycle = "hourly"
+        project_id = "320c2c2f-6876-4621-929a-93a47e07d2da"
+}
+######resource "packet_device" "student5" {
+######        hostname = "student5"
+######        plan = "baremetal_0"
+######        facility = "ams1"
+######	operating_system = "centos_7_image"
+######        billing_cycle = "hourly"
+######        project_id = "320c2c2f-6876-4621-929a-93a47e07d2da"
+######}
 
 # create a master device resoruce in packet.net
 #resource "packet_device" "minion" {
@@ -62,6 +86,12 @@ resource "digitalocean_record" "kolla" {
     name = "kolla"
     value = "${packet_device.kolla.network.0.address}"
 }
+resource "digitalocean_record" "kolla-cmp" {
+    domain = "opsits.com"
+    type = "A"
+    name = "kolla-cmp"
+    value = "${packet_device.kolla-cmp.network.0.address}"
+}
 resource "digitalocean_record" "student1" {
     domain = "opsits.com"
     type = "A"
@@ -80,6 +110,18 @@ resource "digitalocean_record" "student3" {
     name = "student3"
     value = "${packet_device.student3.network.0.address}"
 }
+resource "digitalocean_record" "student4" {
+    domain = "opsits.com"
+    type = "A"
+    name = "student4"
+    value = "${packet_device.student4.network.0.address}"
+}
+######resource "digitalocean_record" "student5" {
+######    domain = "opsits.com"
+######    type = "A"
+######    name = "student5"
+######    value = "${packet_device.student5.network.0.address}"
+######}
 
 #resource "digitalocean_record" "minion" {
 #    domain = "opsits.com"
