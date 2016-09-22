@@ -9,15 +9,15 @@ Lab sections will be made available on the day of the class, and will be listed 
 1) Deploy a test OpenStack System
  - VirtualBox or remote Virutal Machine
  - Leverage Docker/Kolla environment
+ - use either the Vagrant script or the 'centos.sh, import_image.sh, and setup_network.sh' scripts on a VM
 
 Configure the User environment and Access an OpenStack System
  - Horizon Web UI
  - CLI
-  - example of API rest calls via CLI --debug parameter
 
 2) The "Cloud" way: Managing instances
  - No Passwords: public/private SSH key access
  - Scripted initialization
  - Rebuild - Don't fix
 
-3) 
+3)

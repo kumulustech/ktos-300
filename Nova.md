@@ -83,7 +83,8 @@ echo 'enable_cinder: "yes"' >> /etc/kolla/globals.yml
 echo 'enable_swift: "yes"' >> /etc/kolla/globals.yml
 echo 'enable_manila: "yes"' >> /etc/kolla/globals.yml
 
-for n in `docker ps -qa`; do docker stop $n ; docker rm $n; done kolla-ansible deploy
+for n in `docker ps -qa`; do docker stop $n ; docker rm $n; done
+kolla-ansible deploy
 ```
 - now create a volume from an image and boot from that volume
 - boot an instance and ask the system to create a volume for the system's root
