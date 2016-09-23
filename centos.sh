@@ -19,6 +19,7 @@ sed -i "s/^\s*SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config
 yum -y install epel-release centos-release-openstack-mitaka
 
 yum -y install \
+    lvm2 \
     vim \
     net-tools \
     python-pip \
