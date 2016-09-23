@@ -189,6 +189,10 @@ or
 ```
 openstack stack create
 ```
+- Install the heat client
+```
+pip install python-heatclient
+```
 
 - Use the create command to launch the stack, passing the required (and not defaulted) parameters on the command line.
 
